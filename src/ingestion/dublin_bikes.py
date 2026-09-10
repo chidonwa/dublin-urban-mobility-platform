@@ -4,6 +4,8 @@ from pathlib import Path
 import requests
 import pandas as pd
 
+from src.validation.validators import validate_dublin_bikes
+
 
 #stores the data-source address in a variable
 URL = "https://data.smartdublin.ie/dublinbikes-api/bikes/dublin_bikes/current/stations.geojson"
@@ -37,6 +39,7 @@ for feature in features:
         "longitude": coordinates[0],
         "capacity": properties["capacity"],
         "num_bikes_available": properties["num_bikes_available"],
+        "num_docks_available": properties["num_docks_available"],
         "is_installed": properties["is_installed"],
         "is_renting": properties["is_renting"],
         "is_returning": properties["is_returning"],
@@ -47,6 +50,44 @@ for feature in features:
 
 df = pd.DataFrame(stations)
 df["ingested_at"] = pd.Timestamp.now(tz="UTC")
+
+#save raw snapshot
+raw_dir = Path("data/raw")
+raw_dir.mkdir(parents=True, exist_ok=True)
+timestamp = pd.Timestamp.now(tz="UTC").strftime("%Y%m%d_%H%M%S")
+
+raw_file = raw_dir / f"dublin_bikes_{timestamp}.csv"
+
+df.to_csv(raw_file, index=False)
+
+#validate data
+valid_df, invalid_df = validate_dublin_bikes(df)
+
+print(f"Records received: {len(df)}")
+print(f"Valid records: {len(valid_df)}")
+print(f"Invalid records: {len(invalid_df)}")
+
+#quarantine bad records
+if not invalid_df.empty:
+    quarantine_dir = Path("data/quarantine")
+    quarantine_dir.mkdir(parents=True, exist_ok=True)
+
+    quarantine_file = (
+        quarantine_dir
+        / f"dublin_bikes_invalid_{timestamp}.csv"
+    )
+
+    invalid_df.to_csv(
+        quarantine_file,
+        index=False,
+    )
+
+    print(
+        f"Invalid records saved to: {quarantine_file}"
+    )
+
+print(f"Raw snapshot saved to: {raw_file}")
+
 
 output_dir = Path("data/raw")
 output_dir.mkdir(parents=True, exist_ok=True)
@@ -59,7 +100,6 @@ df.to_csv(output_file, index=False)
 
 print("Rows and columns:", df.shape)
 print(df.head())
-print(f"Saved raw snapshot to: {output_file}")
 
 
 
