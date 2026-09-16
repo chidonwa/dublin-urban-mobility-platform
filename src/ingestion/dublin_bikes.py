@@ -5,6 +5,7 @@ import requests
 import pandas as pd
 
 from src.validation.validators import validate_dublin_bikes
+from src.database.postgres import load_dataframe_to_postgres
 
 
 #stores the data-source address in a variable
@@ -87,6 +88,20 @@ if not invalid_df.empty:
     )
 
 print(f"Raw snapshot saved to: {raw_file}")
+
+#convert timestamp column to a proper datetime type
+valid_df["last_reported_dt"] = pd.to_datetime(
+    valid_df["last_reported_dt"],
+    errors="raise",
+)
+
+#load valid records into postgresql
+if not valid_df.empty:
+    load_dataframe_to_postgres(
+        valid_df,
+        table_name="dublin_bikes_station_status",
+        schema="raw",
+    )
 
 
 output_dir = Path("data/raw")
