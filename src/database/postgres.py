@@ -1,9 +1,12 @@
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import MetaData, Table, create_engine
+from sqlalchemy.dialects.postgresql import insert
+
 
 load_dotenv()
+
 
 def get_database_engine():
     """Create and return a PostgreSQL SQLAlchemy engine."""
@@ -21,63 +24,82 @@ def get_database_engine():
 
     return create_engine(database_url)
 
+
 def load_dataframe_to_postgres(
     df,
     table_name,
     schema="raw",
     if_exists="append",
 ):
-    """Load new records from a pandas DataFrame into PostgreSQL."""
+    """Load records into PostgreSQL while skipping duplicates."""
 
     engine = get_database_engine()
 
-    # For Dublin Bikes station observations, remove records that
-    # already exist in PostgreSQL.
+    if df.empty:
+        print("No records to load into PostgreSQL.")
+        return
+
+    # Dublin Bikes observations are uniquely identified by
+    # station ID and the time reported by the source.
     if table_name == "dublin_bikes_station_status":
-        query = text(
-            f"""
-            SELECT station_id, last_reported_dt
-            FROM {schema}.{table_name}
-            """
-        )
+        conflict_columns = [
+            "station_id",
+            "last_reported_dt",
+        ]
 
-        with engine.connect() as connection:
-            existing_records = connection.execute(query).fetchall()
+    # Phoenix Park weather observations are uniquely identified
+    # by station ID and observation time.
+    elif table_name == "phoenix_park_weather":
+        conflict_columns = [
+            "station_id",
+            "observed_at",
+        ]
 
-        existing_keys = {
-            (str(row.station_id), row.last_reported_dt)
-            for row in existing_records
-        }
-
-        is_new = df.apply(
-            lambda row: (
-                str(row["station_id"]),
-                row["last_reported_dt"],
-            ) not in existing_keys,
-            axis=1,
-        )
-
-        df_to_load = df[is_new].copy()
-
-        skipped = len(df) - len(df_to_load)
-
-        print(f"New records to load: {len(df_to_load)}")
-        print(f"Duplicate records skipped: {skipped}")
-
-        if df_to_load.empty:
-            print("No new records to load into PostgreSQL.")
-            return
-
+    # For tables without duplicate-handling rules,
+    # use the normal pandas loading method.
     else:
-        df_to_load = df
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            schema=schema,
+            if_exists=if_exists,
+            index=False,
+            method="multi",
+        )
 
-    df_to_load.to_sql(
-        name=table_name,
-        con=engine,
+        print(f"Loaded {len(df)} records into PostgreSQL.")
+        return
+
+    # Read the existing PostgreSQL table structure.
+    metadata = MetaData()
+
+    table = Table(
+        table_name,
+        metadata,
         schema=schema,
-        if_exists=if_exists,
-        index=False,
-        method="multi",
+        autoload_with=engine,
     )
 
-    print(f"Loaded {len(df_to_load)} new records into PostgreSQL.")
+    # Convert the DataFrame into records that SQLAlchemy can insert.
+    records = df.to_dict(orient="records")
+
+    # Build the PostgreSQL INSERT statement.
+    statement = insert(table).values(records)
+
+    # If the unique station/timestamp combination already exists,
+    # PostgreSQL skips that record instead of raising an error.
+    statement = statement.on_conflict_do_nothing(
+        index_elements=conflict_columns
+    ).returning(table.c.station_id)
+
+    # engine.begin() automatically commits if the operation succeeds
+    # and rolls back if an error occurs.
+    with engine.begin() as connection:
+        result = connection.execute(statement)
+        inserted_rows = result.fetchall()
+
+    inserted = len(inserted_rows)
+    skipped = len(df) - inserted
+
+    print(f"New records loaded: {inserted}")
+    print(f"Duplicate records skipped: {skipped}")

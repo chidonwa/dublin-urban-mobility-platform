@@ -222,3 +222,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Generated weather data
+data/raw/weather/*.csv
+data/quarantine/weather/*.csv

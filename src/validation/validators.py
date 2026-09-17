@@ -141,3 +141,45 @@ def validate_dublin_bikes(df: pd.DataFrame):
 
     return valid_df, invalid_df
 
+def validate_weather_data(df):
+    """Separate valid and invalid weather observations."""
+
+    required_columns = [
+        "station_id",
+        "station_name",
+        "observed_at",
+        "air_temperature",
+        "precipitation_amount",
+        "relative_humidity",
+    ]
+
+    missing_columns = [
+        column
+        for column in required_columns
+        if column not in df.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(
+            f"Missing required weather columns: {missing_columns}"
+        )
+
+    invalid_mask = (
+        df["station_id"].isna()
+        | df["station_name"].isna()
+        | df["observed_at"].isna()
+        | df["air_temperature"].isna()
+        | df["precipitation_amount"].isna()
+        | df["relative_humidity"].isna()
+        | (df["relative_humidity"] < 0)
+        | (df["relative_humidity"] > 100)
+        | (df["precipitation_amount"] < 0)
+        | (df["air_temperature"] < -30)
+        | (df["air_temperature"] > 50)
+    )
+
+    valid_df = df[~invalid_mask].copy()
+    invalid_df = df[invalid_mask].copy()
+
+    return valid_df, invalid_df
+
