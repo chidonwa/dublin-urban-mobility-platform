@@ -183,3 +183,35 @@ def validate_weather_data(df):
 
     return valid_df, invalid_df
 
+
+def validate_nta_vehicles(df):
+    """Separate valid and invalid NTA vehicle records."""
+
+    required_columns = [
+        "vehicle_id",
+        "trip_id",
+        "route_id",
+        "latitude",
+        "longitude",
+        "observed_at",
+    ]
+
+    # A record is invalid if a required value is missing.
+    missing_required = df[required_columns].isna().any(axis=1)
+
+    # Latitude must be between -90 and 90.
+    invalid_latitude = ~df["latitude"].between(-90, 90)
+
+    # Longitude must be between -180 and 180.
+    invalid_longitude = ~df["longitude"].between(-180, 180)
+
+    invalid_mask = (
+        missing_required
+        | invalid_latitude
+        | invalid_longitude
+    )
+
+    valid_df = df[~invalid_mask].copy()
+    invalid_df = df[invalid_mask].copy()
+
+    return valid_df, invalid_df

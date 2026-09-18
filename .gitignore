@@ -226,3 +226,7 @@ __marimo__/
 # Generated weather data
 data/raw/weather/*.csv
 data/quarantine/weather/*.csv
+
+# Generated NTA data
+data/raw/nta/*.csv
+data/quarantine/nta/*.csv

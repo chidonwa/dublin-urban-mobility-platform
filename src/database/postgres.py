@@ -55,6 +55,12 @@ def load_dataframe_to_postgres(
             "observed_at",
         ]
 
+    elif table_name == "nta_vehicle_positions":
+        conflict_columns = [
+            "vehicle_id",
+            "observed_at",
+        ]
+
     # For tables without duplicate-handling rules,
     # use the normal pandas loading method.
     else:
@@ -90,7 +96,7 @@ def load_dataframe_to_postgres(
     # PostgreSQL skips that record instead of raising an error.
     statement = statement.on_conflict_do_nothing(
         index_elements=conflict_columns
-    ).returning(table.c.station_id)
+    ).returning(*[table.c[column] for column in conflict_columns])
 
     # engine.begin() automatically commits if the operation succeeds
     # and rolls back if an error occurs.
