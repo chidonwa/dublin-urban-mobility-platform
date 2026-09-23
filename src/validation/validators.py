@@ -215,3 +215,133 @@ def validate_nta_vehicles(df):
     invalid_df = df[invalid_mask].copy()
 
     return valid_df, invalid_df
+
+def validate_gtfs_routes(df):
+    """Separate valid and invalid GTFS route records."""
+
+    required_columns = [
+        "route_id",
+        "route_type",
+    ]
+
+    missing_required = df[required_columns].isna().any(axis=1)
+
+    duplicate_route = df.duplicated(
+        subset=["route_id"],
+        keep=False,
+    )
+
+    invalid_mask = (
+        missing_required
+        | duplicate_route
+    )
+
+    valid_df = df[~invalid_mask].copy()
+    invalid_df = df[invalid_mask].copy()
+
+    return valid_df, invalid_df
+
+def validate_gtfs_trips(df):
+    """Separate valid and invalid GTFS trip records."""
+
+    required_columns = [
+        "trip_id",
+        "route_id",
+        "service_id",
+    ]
+
+    missing_required = df[required_columns].isna().any(axis=1)
+
+    duplicate_trip = df.duplicated(
+        subset=["trip_id"],
+        keep=False,
+    )
+
+    invalid_mask = (
+        missing_required
+        | duplicate_trip
+    )
+
+    valid_df = df[~invalid_mask].copy()
+    invalid_df = df[invalid_mask].copy()
+
+    return valid_df, invalid_df
+
+def validate_gtfs_stops(df):
+    """Separate valid and invalid GTFS stop records."""
+
+    required_columns = [
+        "stop_id",
+        "stop_name",
+        "stop_lat",
+        "stop_lon",
+    ]
+
+    missing_required = df[required_columns].isna().any(axis=1)
+
+    duplicate_stop = df.duplicated(
+        subset=["stop_id"],
+        keep=False,
+    )
+
+    stop_lat = pd.to_numeric(
+        df["stop_lat"],
+        errors="coerce",
+    )
+
+    stop_lon = pd.to_numeric(
+        df["stop_lon"],
+        errors="coerce",
+    )
+
+    invalid_latitude = ~stop_lat.between(-90, 90)
+    invalid_longitude = ~stop_lon.between(-180, 180)
+
+    invalid_mask = (
+        missing_required
+        | duplicate_stop
+        | invalid_latitude
+        | invalid_longitude
+    )
+
+    valid_df = df[~invalid_mask].copy()
+    invalid_df = df[invalid_mask].copy()
+
+    return valid_df, invalid_df
+
+def validate_gtfs_stop_times(df):
+    """Separate valid and invalid GTFS stop-time records."""
+
+    required_columns = [
+        "trip_id",
+        "stop_id",
+        "stop_sequence",
+    ]
+
+    missing_required = df[required_columns].isna().any(axis=1)
+
+    stop_sequence = pd.to_numeric(
+        df["stop_sequence"],
+        errors="coerce",
+    )
+
+    invalid_stop_sequence = (
+        stop_sequence.isna()
+        | (stop_sequence < 0)
+    )
+
+    duplicate_stop_time = df.duplicated(
+        subset=["trip_id", "stop_sequence"],
+        keep=False,
+    )
+
+    invalid_mask = (
+        missing_required
+        | invalid_stop_sequence
+        | duplicate_stop_time
+    )
+
+    valid_df = df[~invalid_mask].copy()
+    invalid_df = df[invalid_mask].copy()
+
+    return valid_df, invalid_df
