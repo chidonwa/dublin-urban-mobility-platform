@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: fct_vehicle_trip_observations
+    description: >
+      Analytics-ready NTA vehicle position observations enriched with
+      static GTFS trip and route information. Invalid default coordinates
+      at (0, 0) are excluded from this mart.
+
+    columns:
+      - name: vehicle_id
+        tests:
+          - not_null
+
+      - name: trip_id
+        tests:
+          - not_null
+
+      - name: route_id
+        tests:
+          - not_null
+
+      - name: route_type
+        tests:
+          - not_null
+
+      - name: latitude
+        tests:
+          - not_null
+
+      - name: longitude
+        tests:
+          - not_null
+
+      - name: observed_at
+        tests:
+          - not_null

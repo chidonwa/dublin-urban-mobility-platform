@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: fct_bike_weather_observations
+    description: "Dublin Bikes station availability observations enriched with hourly Phoenix Park weather data."
+
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+
+      - name: station_name
+        tests:
+          - not_null
+
+      - name: capacity
+        tests:
+          - not_null
+
+      - name: num_bikes_available
+        tests:
+          - not_null
+
+      - name: num_docks_available
+        tests:
+          - not_null
+
+      - name: bike_availability_pct
+        tests:
+          - not_null
+
+      - name: dock_availability_pct
+        tests:
+          - not_null
+
+      - name: bike_observed_at
+        tests:
+          - not_null
+
+      - name: weather_observed_at
+        tests:
+          - not_null
+
+      - name: air_temperature
+        tests:
+          - not_null
