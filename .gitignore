@@ -12,6 +12,9 @@ data/quarantine/*.csv
 # C extensions
 *.so
 
+# macOS system files
+.DS_Store
+
 # Distribution / packaging
 .Python
 build/
@@ -230,3 +233,10 @@ data/quarantine/weather/*.csv
 # Generated NTA data
 data/raw/nta/*.csv
 data/quarantine/nta/*.csv
+
+# NTA static GTFS source data
+data/raw/gtfs/*.txt
+data/raw/gtfs/*.zip
+
+# NTA static GTFS data
+data/raw/gtfs/*.txt

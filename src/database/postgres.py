@@ -61,6 +61,27 @@ def load_dataframe_to_postgres(
             "observed_at",
         ]
 
+    elif table_name == "gtfs_routes":
+        conflict_columns = [
+        "route_id",
+        ]
+
+    elif table_name == "gtfs_trips":
+        conflict_columns = [
+        "trip_id",
+        ]
+
+    elif table_name == "gtfs_stops":
+        conflict_columns = [
+        "stop_id",
+        ]
+
+    elif table_name == "gtfs_stop_times":
+        conflict_columns = [
+            "trip_id",
+            "stop_sequence",
+        ]
+
     # For tables without duplicate-handling rules,
     # use the normal pandas loading method.
     else:
@@ -86,25 +107,40 @@ def load_dataframe_to_postgres(
         autoload_with=engine,
     )
 
-    # Convert the DataFrame into records that SQLAlchemy can insert.
-    records = df.to_dict(orient="records")
+    # Insert the DataFrame in smaller batches.
+    # This prevents very large datasets from being sent to PostgreSQL
+    # in one enormous INSERT statement.
+    batch_size = 5000
 
-    # Build the PostgreSQL INSERT statement.
-    statement = insert(table).values(records)
+    inserted = 0
 
-    # If the unique station/timestamp combination already exists,
-    # PostgreSQL skips that record instead of raising an error.
-    statement = statement.on_conflict_do_nothing(
-        index_elements=conflict_columns
-    ).returning(*[table.c[column] for column in conflict_columns])
-
-    # engine.begin() automatically commits if the operation succeeds
-    # and rolls back if an error occurs.
     with engine.begin() as connection:
-        result = connection.execute(statement)
-        inserted_rows = result.fetchall()
 
-    inserted = len(inserted_rows)
+        for start in range(0, len(df), batch_size):
+
+            batch_df = df.iloc[start:start + batch_size]
+
+            # Convert this batch into records that SQLAlchemy can insert.
+            records = batch_df.to_dict(orient="records")
+
+            # Build the PostgreSQL INSERT statement.
+            statement = insert(table).values(records)
+
+            # Skip records whose unique key already exists.
+            statement = statement.on_conflict_do_nothing(
+                index_elements=conflict_columns
+            ).returning(
+                *[
+                    table.c[column]
+                    for column in conflict_columns
+                ]
+            )
+
+            result = connection.execute(statement)
+            inserted_rows = result.fetchall()
+
+            inserted += len(inserted_rows)
+
     skipped = len(df) - inserted
 
     print(f"New records loaded: {inserted}")
