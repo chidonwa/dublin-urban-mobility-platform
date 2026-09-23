@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw mobility and weather data loaded into PostgreSQL by the Python ingestion pipelines.
+    schema: raw
+
+    tables:
+      - name: dublin_bikes_station_status
+        description: Raw Dublin Bikes station availability observations.
+
+      - name: phoenix_park_weather
+        description: Raw Phoenix Park weather observations from Met Éireann.
+
+      - name: nta_vehicle_positions
+        description: Raw NTA real-time vehicle position observations.
+
+      - name: gtfs_routes
+        description: Static NTA GTFS route information.
+
+      - name: gtfs_trips
+        description: Static NTA GTFS trip information.
+
+      - name: gtfs_stops
+        description: Static NTA GTFS stop information.
+
+      - name: gtfs_stop_times
+        description: Static NTA GTFS stop sequence and scheduled time information.

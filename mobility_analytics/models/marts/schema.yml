@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: fct_stop_service_summary
+    description: >
+      Aggregated scheduled public transport service metrics for each
+      GTFS stop.
+
+    columns:
+      - name: stop_id
+        description: Unique GTFS stop identifier.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: stop_name
+        description: Name of the transport stop.
+        data_tests:
+          - not_null
+
+      - name: scheduled_stop_events
+        description: Number of scheduled stop events at the stop.
+        data_tests:
+          - not_null
+
+      - name: distinct_trips
+        description: Number of distinct scheduled trips serving the stop.
+        data_tests:
+          - not_null
+
+      - name: distinct_routes
+        description: Number of distinct routes serving the stop.
+        data_tests:
+          - not_null
+
+      - name: transport_modes
+        description: Number of distinct transport modes serving the stop.
+        data_tests:
+          - not_null

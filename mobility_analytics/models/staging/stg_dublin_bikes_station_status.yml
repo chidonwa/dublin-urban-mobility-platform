@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: stg_dublin_bikes_station_status
+    description: "Clean staging view of historical Dublin Bikes station status observations."
+
+    columns:
+      - name: station_id
+        description: "Unique identifier for a Dublin Bikes station."
+        data_tests:
+          - not_null
+
+      - name: station_name
+        description: "Name of the Dublin Bikes station."
+        data_tests:
+          - not_null
+
+      - name: latitude
+        data_tests:
+          - not_null
+
+      - name: longitude
+        data_tests:
+          - not_null
+
+      - name: capacity
+        data_tests:
+          - not_null
+
+      - name: num_bikes_available
+        data_tests:
+          - not_null
+
+      - name: num_docks_available
+        data_tests:
+          - not_null
+
+      - name: last_reported_dt
+        description: "Timestamp when the station status was reported."
+        data_tests:
+          - not_null

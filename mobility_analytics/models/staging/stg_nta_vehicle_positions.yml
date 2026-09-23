@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_nta_vehicle_positions
+    description: "Cleaned staging model for NTA real-time vehicle position observations."
+
+    columns:
+      - name: vehicle_id
+        tests:
+          - not_null
+
+      - name: trip_id
+        tests:
+          - not_null
+
+      - name: route_id
+        tests:
+          - not_null
+
+      - name: latitude
+        tests:
+          - not_null
+
+      - name: longitude
+        tests:
+          - not_null
+
+      - name: observed_at
+        tests:
+          - not_null
