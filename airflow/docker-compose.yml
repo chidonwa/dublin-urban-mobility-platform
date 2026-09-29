@@ -1,0 +1,33 @@
+services:
+  airflow:
+    build:
+      context: ..
+      dockerfile: airflow/Dockerfile
+
+    image: dublin-mobility-airflow:3.1.0
+    user: "${AIRFLOW_UID:-50000}:0"
+
+    env_file:
+      - ../.env
+
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      DB_HOST: host.docker.internal
+      DB_DRIVER: psycopg2
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./dbt:/opt/airflow/dbt:ro
+      - ../src:/opt/project/src:ro
+      - ../data:/opt/project/data
+      - ../mobility_analytics:/opt/project/mobility_analytics:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    ports:
+      - "8080:8080"
+
+    command: airflow standalone

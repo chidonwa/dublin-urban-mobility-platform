@@ -16,9 +16,10 @@ def get_database_engine():
     database = os.getenv("DB_NAME")
     user = os.getenv("DB_USER")
     password = os.getenv("DB_PASSWORD", "")
+    driver = os.getenv("DB_DRIVER", "psycopg")
 
     database_url = (
-        f"postgresql+psycopg://{user}:{password}"
+        f"postgresql+{driver}://{user}:{password}"
         f"@{host}:{port}/{database}"
     )
 

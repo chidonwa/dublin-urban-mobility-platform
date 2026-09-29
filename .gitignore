@@ -240,3 +240,11 @@ data/raw/gtfs/*.zip
 
 # NTA static GTFS data
 data/raw/gtfs/*.txt
+# Airflow generated files
+airflow/logs/
+airflow/airflow.cfg
+airflow/airflow.db
+airflow/webserver_config.py
+
+# Airflow local environment
+airflow/.env
