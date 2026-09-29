@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: mart_bike_station_summary
+    description: >
+      Station-level summary of Dublin Bikes availability observations.
+      Metrics describe the collected observation period and should not
+      be interpreted as long-term passenger demand.
+
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+          - unique
+
+      - name: station_name
+        tests:
+          - not_null
+
+      - name: capacity
+        tests:
+          - not_null
+
+      - name: observation_count
+        tests:
+          - not_null
+
+      - name: avg_bikes_available
+        tests:
+          - not_null
+
+      - name: avg_docks_available
+        tests:
+          - not_null
+
+      - name: avg_bike_availability_pct
+        tests:
+          - not_null
+
+      - name: avg_dock_availability_pct
+        tests:
+          - not_null
+
+      - name: empty_station_observations
+        tests:
+          - not_null
+
+      - name: full_station_observations
+        tests:
+          - not_null
+
+      - name: first_observed_at
+        tests:
+          - not_null
+
+      - name: latest_observed_at
+        tests:
+          - not_null

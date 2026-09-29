@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: mart_hourly_service_summary
+    description: >
+      Hourly summary of scheduled GTFS service by transport mode.
+      The metrics represent scheduled service supply, not passenger
+      demand or actual ridership.
+
+    columns:
+      - name: gtfs_hour
+        tests:
+          - not_null
+
+      - name: route_type
+        tests:
+          - not_null
+
+      - name: transport_mode
+        tests:
+          - not_null
+
+      - name: scheduled_stop_events
+        tests:
+          - not_null
+
+      - name: distinct_trips
+        tests:
+          - not_null
+
+      - name: distinct_routes
+        tests:
+          - not_null
