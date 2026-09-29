@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: mart_hourly_bike_weather
+    description: >
+      Hourly summary of Dublin Bikes availability and Phoenix Park
+      weather observations. Bike and dock availability are first
+      averaged at station-hour level so that each observed station
+      contributes equally to the network-wide hourly averages.
+      The bike metrics represent observed station availability,
+      not rental transactions or passenger demand.
+
+    columns:
+      - name: observation_hour
+        description: Hour used to aggregate bike and weather observations.
+        tests:
+          - not_null
+          - unique
+
+      - name: station_observations
+        description: Total number of underlying bike station snapshots observed during the hour.
+        tests:
+          - not_null
+
+      - name: stations_observed
+        description: Number of distinct bike stations represented during the hour.
+        tests:
+          - not_null
+
+      - name: avg_bike_availability_pct
+        description: Average percentage of bikes available across observed stations during the hour.
+        tests:
+          - not_null
+
+      - name: avg_dock_availability_pct
+        description: Average percentage of docks available across observed stations during the hour.
+        tests:
+          - not_null
+
+      - name: avg_air_temperature
+        description: Average observed air temperature for the hour.
+        tests:
+          - not_null
+
+      - name: avg_precipitation_amount
+        description: Average observed precipitation amount for the hour.
+        tests:
+          - not_null
+
+      - name: avg_relative_humidity
+        description: Average observed relative humidity for the hour.
+        tests:
+          - not_null
+
+      - name: avg_air_pressure
+        description: Average observed air pressure for the hour.
+        tests:
+          - not_null
